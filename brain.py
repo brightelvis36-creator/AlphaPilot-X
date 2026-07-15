@@ -5,6 +5,8 @@ from history import add_trade, get_history, show_history, get_stats
 from risk_reward import calculate_rr
 from setup_ai import analyze_setup
 from market_analysis import analyze_market
+from signal_engine import generate_signal
+from signal_engine import generate_signal
 def alphapilot_response(message):
     original = message
     message = message.lower().strip()
@@ -132,6 +134,9 @@ forget favorite pair
     elif message.startswith("analyze "):
         pair = message.replace("analyze ", "", 1)
         return analyze_market(pair)
+    elif message.startswith("signal "):
+        pair = message.replace("signal ", "", 1)
+        return generate_signal(pair)
     else:
         return "🤖 I don't understand that command yet. Type 'help' to see available commands."
     
