@@ -1,15 +1,16 @@
 from datetime import datetime
-from memory import remember, get_all_memory
-
+from memory import remember, recall, forget, get_all_memory
+from trading import trade_setup
 
 def alphapilot_response(message):
+    original = message
     message = message.lower().strip()
 
     if message in ["hello", "hi", "hey"]:
-        return "👋 Hello Boss! AlphaPilot Brain v2 is online. 🧠"
+        return "👋 Hello Boss! AlphaPilot Brain v8.3 is online. 🧠"
 
     elif message == "status":
-        return "🟢 AlphaPilot systems online. Brain v2 active."
+        return "🟢 AlphaPilot systems online. Memory Intelligence active."
 
     elif message == "time":
         return datetime.now().strftime("🕒 %Y-%m-%d %H:%M:%S")
@@ -18,28 +19,62 @@ def alphapilot_response(message):
         memories = get_all_memory()
         if memories:
             return f"🧠 Memory:\n{memories}"
-        else:
-            return "🧠 No memories stored yet."
+        return "🧠 No memories stored yet."
 
     elif message.startswith("learn "):
-        info = message.replace("learn ", "", 1)
+        info = original[6:]
         remember("user_info", info)
         return f"✅ Learned: {info}"
 
+    elif message.startswith("remember "):
+        info = original[9:]
+
+        if " is " in info:
+            key, value = info.split(" is ", 1)
+            remember(key.strip(), value.strip())
+            return f"🧠 Saved memory: {key.strip()} = {value.strip()}"
+
+        return "⚠️ Use: remember key is value"
+
+    elif message.startswith("recall "):
+        key = original[7:].strip()
+        result = recall(key)
+
+        if result is not None:
+            return f"🧠 {key}: {result}"
+
+        return f"🧠 I don't remember '{key}'."
+
+    elif message.startswith("forget "):
+        key = original[7:].strip()
+
+        if forget(key):
+            return f"🗑️ Forgot: {key}"
+
+        return f"🧠 I couldn't find '{key}'."
+
     elif message == "help":
         return """
-🚀 AlphaPilot Brain v2 Commands
+🚀 AlphaPilot Brain v8.3 Commands
 
 hello
 status
 time
 memory
 learn [information]
+remember key is value
+recall key
+forget key
 help
 
-Example:
+Examples:
 learn my name is Bright
+remember favorite pair is EURUSD
+recall favorite pair
+forget favorite pair
 """
-
+    elif message.startswith("trade "):
+        pair = original[6:].strip().upper()
+        return trade_setup(pair)
     else:
-        return "🤖 I don't understand yet. Type 'help' to see commands."
+        return "🤖 I don't understand that command yet. Type 'help' to see available commands."

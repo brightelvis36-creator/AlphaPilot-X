@@ -3,15 +3,24 @@ def calculate_risk(balance, risk_percent):
     return round(amount, 2)
 
 
-def trade_plan():
-    return """
+def trade_setup(pair="EURUSD"):
+    return f"""
 📊 AlphaPilot Trade Plan
 
-Pair: EURUSD
-Direction: BUY
+Pair: {pair}
+Direction: Manual
+Trend: Manual
 Entry: Manual
 Stop Loss: Manual
 Take Profit: Manual
+Risk/Reward: 1:2 (Recommended)
 
-Always confirm before trading.
+Checklist:
+☐ Trend confirmed
+☐ Support identified
+☐ Resistance identified
+☐ Risk calculated
+☐ Entry confirmed
+
+⚠️ Always confirm your setup before placing a trade.
 """

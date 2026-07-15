@@ -1,4 +1,12 @@
 {
     "my name": "bright",
-    "name": "bright"
+    "name": "bright",
+    "test": {
+        "value": "working",
+        "updated": "2026-07-14 12:02:37"
+    },
+    "favorite pair": {
+        "value": "EURUSD",
+        "updated": "2026-07-15 08:50:12"
+    }
 }
