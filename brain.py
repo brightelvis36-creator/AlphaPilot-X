@@ -2,7 +2,7 @@ from datetime import datetime
 from memory import remember, recall, forget, get_all_memory
 from trading import trade_setup
 from history import add_trade, get_history, show_history, get_stats
-
+from risk_reward import calculate_rr
 
 def alphapilot_response(message):
     original = message
@@ -104,7 +104,16 @@ forget favorite pair
         )
     elif message == "stats":
         return get_stats()
+    elif message.startswith("rr "):
+        parts = message.split()
 
+        if len(parts) == 3:
+            risk = float(parts[1])
+            reward = float(parts[2])
+
+            return calculate_rr(risk, reward)
+
+        return "Usage: rr risk reward"
     else:
         return "🤖 I don't understand that command yet. Type 'help' to see available commands."
     
