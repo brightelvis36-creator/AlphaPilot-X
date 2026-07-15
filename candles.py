@@ -6,6 +6,7 @@ load_dotenv()
 
 
 def get_candles(pair="EURUSD", interval="1h"):
+
     pair = pair.upper()
 
     if len(pair) == 6:
@@ -21,8 +22,12 @@ def get_candles(pair="EURUSD", interval="1h"):
         f"&apikey={api_key}"
     )
 
-    response = requests.get(url, timeout=15)
-    data = response.json()
+    try:
+        response = requests.get(url, timeout=30)
+        data = response.json()
+
+    except Exception:
+        return None
 
     if "values" not in data:
         return None
