@@ -36,3 +36,51 @@ def add_trade(pair, direction, entry, stop_loss, take_profit, result):
 
 def get_history():
     return load_history()
+def get_history():
+    return load_history()
+
+
+def show_history():
+    history = get_history()
+def get_stats():
+    history = get_history()
+
+    total = len(history)
+
+    if total == 0:
+        return "📊 No trades recorded yet."
+
+    wins = 0
+    losses = 0
+
+    for trade in history:
+        result = trade["result"].upper()
+
+        if result == "WIN":
+            wins += 1
+        elif result == "LOSS":
+            losses += 1
+
+    win_rate = (wins / total) * 100
+
+    return f"""
+📊 Trading Statistics
+
+Total Trades: {total}
+Wins: {wins}
+Losses: {losses}
+Win Rate: {win_rate:.1f}%
+"""
+    if not history:
+        return "📒 No trades saved yet."
+
+    output = "📒 AlphaPilot Trade Journal\n\n"
+
+    for i, trade in enumerate(history, start=1):
+        output += (
+            f"{i}. {trade['pair']} | "
+            f"{trade['direction']} | "
+            f"{trade['result']}\n"
+        )
+
+    return output
