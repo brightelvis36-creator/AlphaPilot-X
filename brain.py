@@ -3,7 +3,7 @@ from memory import remember, recall, forget, get_all_memory
 from trading import trade_setup
 from history import add_trade, get_history, show_history, get_stats
 from risk_reward import calculate_rr
-
+from setup_ai import analyze_setup
 def alphapilot_response(message):
     original = message
     message = message.lower().strip()
@@ -112,7 +112,21 @@ forget favorite pair
             reward = float(parts[2])
 
             return calculate_rr(risk, reward)
+    elif message.startswith("setup "):
+        parts = message.split()
 
+        if len(parts) == 6:
+            _, pair, direction, entry, stop_loss, take_profit = parts
+
+            return analyze_setup(
+                pair,
+                direction,
+                entry,
+                stop_loss,
+                take_profit
+            )
+
+        return "Usage: setup PAIR BUY/SELL ENTRY STOPLOSS TAKEPROFIT"
         return "Usage: rr risk reward"
     else:
         return "🤖 I don't understand that command yet. Type 'help' to see available commands."
