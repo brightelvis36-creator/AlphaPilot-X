@@ -1,31 +1,50 @@
+import os
 import requests
 from datetime import datetime
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 def get_price(pair):
     pair = pair.upper()
 
-    try:
-        url = f"https://api.twelvedata.com/price?symbol={pair}"
+    if len(pair) == 6:
+        pair = pair[:3] + "/" + pair[3:]
 
-        response = requests.get(url, timeout=10)
-        data = response.json()
+    api_key = os.getenv("TWELVE_DATA_API_KEY")
 
-        price = data.get("price")
-
-        if price:
-            return {
-                "pair": pair,
-                "price": price,
-                "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                "status": "Live"
-            }
-
+    if not api_key:
         return {
             "pair": pair,
             "price": "Unavailable",
             "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "status": data.get("message", "No data")
+            "status": "Missing API key"
+        }
+
+    try:
+        url = (
+            "https://api.twelvedata.com/price"
+            f"?symbol={pair}"
+            f"&apikey={api_key}"
+        )
+
+        response = requests.get(url, timeout=10)
+        data = response.json()
+
+        if "price" not in data:
+            return {
+                "pair": pair,
+                "price": "Unavailable",
+                "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "status": data.get("message", "API error")
+            }
+
+        return {
+            "pair": pair,
+            "price": round(float(data["price"]), 5),
+            "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "status": "Connected"
         }
 
     except Exception as e:

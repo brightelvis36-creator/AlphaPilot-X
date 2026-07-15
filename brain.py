@@ -1,147 +1,77 @@
 from datetime import datetime
-from memory import remember, recall, forget, get_all_memory
-from trading import trade_setup
-from history import add_trade, get_history, show_history, get_stats
-from risk_reward import calculate_rr
-from setup_ai import analyze_setup
-from market_analysis import analyze_market
+
+from memory import remember, get_all_memory
+from analyzer import analyze_market
+from market_feed import get_price
 from signal_engine import generate_signal
-from signal_engine import generate_signal
-from live_market import get_market_data
+
+
 def alphapilot_response(message):
-    original = message
     message = message.lower().strip()
 
     if message in ["hello", "hi", "hey"]:
-        return "👋 Hello Boss! AlphaPilot Brain v8.3 is online. 🧠"
+        return "👋 Hello Boss! AlphaPilot Brain v9.4 is online. 🧠"
 
     elif message == "status":
-        return "🟢 AlphaPilot systems online. Memory Intelligence active."
+        return "🟢 AlphaPilot systems online. Brain active."
 
     elif message == "time":
         return datetime.now().strftime("🕒 %Y-%m-%d %H:%M:%S")
 
     elif message == "memory":
         memories = get_all_memory()
-        if memories:
-            return f"🧠 Memory:\n{memories}"
-        return "🧠 No memories stored yet."
+        return f"🧠 Memory:\n{memories}"
 
     elif message.startswith("learn "):
-        info = original[6:]
+        info = message.replace("learn ", "", 1)
         remember("user_info", info)
         return f"✅ Learned: {info}"
 
-    elif message.startswith("remember "):
-        info = original[9:]
+    elif message.startswith("signal "):
+        pair = message.replace("signal ", "", 1).upper()
+        return generate_signal(pair)
 
-        if " is " in info:
-            key, value = info.split(" is ", 1)
-            remember(key.strip(), value.strip())
-            return f"🧠 Saved memory: {key.strip()} = {value.strip()}"
+    elif message.startswith("analyze "):
+        parts = message.split()
 
-        return "⚠️ Use: remember key is value"
+        if len(parts) >= 2:
+            pair = parts[1].upper()
 
-    elif message.startswith("recall "):
-        key = original[7:].strip()
-        result = recall(key)
+            market = get_price(pair)
+            price = market.get("price")
 
-        if result is not None:
-            return f"🧠 {key}: {result}"
+            result = analyze_market(pair, price)
 
-        return f"🧠 I don't remember '{key}'."
+            return f"""
+📊 AlphaPilot Market Analysis
 
-    elif message.startswith("forget "):
-        key = original[7:].strip()
+Pair: {result['pair']}
+Price: {result['price']}
 
-        if forget(key):
-            return f"🗑️ Forgot: {key}"
+Trend: {result['trend']}
 
-        return f"🧠 I couldn't find '{key}'."
+Support: {result['support']}
+Resistance: {result['resistance']}
+
+Signal: {result['signal']}
+Confidence: {result['confidence']}
+"""
+
+        return "Usage: analyze EURUSD"
 
     elif message == "help":
         return """
-🚀 AlphaPilot Brain v8.3 Commands
+🚀 AlphaPilot Commands
 
 hello
 status
 time
 memory
-learn [information]
-remember key is value
-recall key
-forget key
+learn [info]
+signal EURUSD
+analyze EURUSD
 help
-
-Examples:
-learn my name is Bright
-remember favorite pair is EURUSD
-recall favorite pair
-forget favorite pair
 """
-    elif message.startswith("trade "):
-        pair = original[6:].strip().upper()
-        return trade_setup(pair)
-    elif message == "journal":
-        return show_history()
 
-    elif message.startswith("journal "):
-        ...
-
-        if len(parts) == 7:
-            _, pair, direction, entry, stop_loss, take_profit, result = parts
-
-            return add_trade(
-                pair.upper(),
-                direction.upper(),
-                entry,
-                stop_loss,
-                take_profit,
-                result.upper()
-            )
-
-        return (
-            "Usage:\n"
-            "journal PAIR BUY/SELL ENTRY STOPLOSS TAKEPROFIT WIN/LOSS\n"
-            "Example:\n"
-            "journal EURUSD BUY 1.1700 1.1660 1.1780 WIN"
-        )
-    elif message == "stats":
-        return get_stats()
-    elif message.startswith("rr "):
-        parts = message.split()
-
-        if len(parts) == 3:
-            risk = float(parts[1])
-            reward = float(parts[2])
-
-            return calculate_rr(risk, reward)
-    elif message.startswith("setup "):
-        parts = message.split()
-
-        if len(parts) == 6:
-            _, pair, direction, entry, stop_loss, take_profit = parts
-
-            return analyze_setup(
-                pair,
-                direction,
-                entry,
-                stop_loss,
-                take_profit
-            )
-
-        return "Usage: setup PAIR BUY/SELL ENTRY STOPLOSS TAKEPROFIT"
-        return "Usage: rr risk reward"
-    elif message.startswith("analyze "):
-        pair = message.replace("analyze ", "", 1)
-        return analyze_market(pair)
-    elif message.startswith("signal "):
-        pair = message.replace("signal ", "", 1)
-        return generate_signal(pair)
-    elif message.startswith("market "):
-        pair = message.replace("market ", "", 1)
-        return get_market_data(pair)
     else:
-        return "🤖 I don't understand that command yet. Type 'help' to see available commands."
-    
-  
+        return "🤖 I don't understand that command. Type help."

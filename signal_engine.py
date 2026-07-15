@@ -1,38 +1,69 @@
+from market_feed import get_price
+from strategy import analyze_strategy
+
+
 def generate_signal(pair):
-    pair = pair.upper()
 
-    trend = "BULLISH"
+    market = get_price(pair)
 
-    if trend == "BULLISH":
-        direction = "BUY"
-        entry = 1.1700
-        stop_loss = 1.1650
-        take_profit_1 = 1.1800
-        take_profit_2 = 1.1850
+    if market["price"] == "Unavailable":
+        return "❌ Live market price unavailable."
+
+    price = float(market["price"])
+
+    result = analyze_strategy(pair)
+
+    signal = result["signal"]
+    confidence = result["confidence"]
+
+    if signal == "WAIT":
+        return f"""
+📡 AlphaPilot Smart Signal
+
+Pair: {pair}
+
+Signal: WAIT
+
+Confidence: {confidence}%
+
+Reason: {result["reason"]}
+
+SMA: {result["SMA"]}
+EMA: {result["EMA"]}
+RSI: {result["RSI"]}
+
+⚠️ No clear setup.
+"""
+
+    if signal == "BUY":
+        sl = price - 0.0050
+        tp1 = price + 0.0100
+        tp2 = price + 0.0150
+
     else:
-        direction = "SELL"
-        entry = 1.1700
-        stop_loss = 1.1750
-        take_profit_1 = 1.1600
-        take_profit_2 = 1.1550
+        sl = price + 0.0050
+        tp1 = price - 0.0100
+        tp2 = price - 0.0150
 
     return f"""
 📡 AlphaPilot Smart Signal
 
 Pair: {pair}
 
-Signal: {direction}
+Signal: {signal}
 
-Entry Zone: {entry}
+Entry: {round(price,5)}
 
-Stop Loss: {stop_loss}
+Stop Loss: {round(sl,5)}
 
-Take Profit 1: {take_profit_1}
-Take Profit 2: {take_profit_2}
+Take Profit 1: {round(tp1,5)}
 
-Risk/Reward: 1:2+
+Take Profit 2: {round(tp2,5)}
 
-Confidence: 75%
+Confidence: {confidence}%
+
+Reason: {result["reason"]}
 
 ⚠️ Confirm before trading.
 """
+
