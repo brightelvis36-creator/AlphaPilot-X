@@ -8,6 +8,7 @@ def analyze_strategy(pair="EURUSD"):
 
     if not candles:
         return {
+            "pair": pair.upper(),
             "signal": "WAIT",
             "confidence": 0,
             "reason": "No candle data available"
@@ -19,27 +20,55 @@ def analyze_strategy(pair="EURUSD"):
     ema_value = ema(prices)
     rsi_value = rsi(prices)
 
-    signal = "HOLD"
-    confidence = 50
+    score = 0
+    reasons = []
 
-    reason = []
+    last_price = prices[-1]
+    previous_price = prices[-2]
 
-    if ema_value > sma_value and rsi_value > 50:
+    # Trend check
+    if ema_value > sma_value:
+        score += 30
+        reasons.append("EMA bullish trend")
+    else:
+        score -= 30
+        reasons.append("EMA bearish trend")
+
+    # RSI check
+    if rsi_value > 55:
+        score += 30
+        reasons.append("RSI bullish momentum")
+
+    elif rsi_value < 45:
+        score -= 30
+        reasons.append("RSI bearish momentum")
+
+    else:
+        reasons.append("RSI neutral")
+
+    # Candle movement
+    if last_price > previous_price:
+        score += 20
+        reasons.append("Price rising")
+    else:
+        score -= 20
+        reasons.append("Price falling")
+
+    # Final decision
+    if score >= 50:
         signal = "BUY"
-        confidence = 75
-        reason.append("EMA above SMA")
-        reason.append("RSI bullish")
 
-    elif ema_value < sma_value and rsi_value < 50:
+    elif score <= -50:
         signal = "SELL"
-        confidence = 75
-        reason.append("EMA below SMA")
-        reason.append("RSI bearish")
 
     else:
         signal = "WAIT"
+
+    # Confidence
+    if signal == "WAIT":
         confidence = 50
-        reason.append("Mixed indicators")
+    else:
+        confidence = min(abs(score) + 20, 95)
 
     return {
         "pair": pair.upper(),
@@ -48,5 +77,5 @@ def analyze_strategy(pair="EURUSD"):
         "SMA": round(sma_value, 5),
         "EMA": round(ema_value, 5),
         "RSI": round(rsi_value, 2),
-        "reason": ", ".join(reason)
+        "reason": ", ".join(reasons)
     }
