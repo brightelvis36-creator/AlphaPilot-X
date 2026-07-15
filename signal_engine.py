@@ -17,6 +17,7 @@ def generate_signal(pair):
 
     signal = result["signal"]
     confidence = result["confidence"]
+    setup_rating = result["setup"]
 
     if signal == "WAIT":
         return f"""
@@ -27,6 +28,8 @@ Pair: {pair}
 Signal: WAIT
 
 Confidence: {confidence}%
+
+Setup: {setup_rating}
 
 Reason:
 {result["reason"]}
@@ -55,6 +58,8 @@ Pair: {pair}
 Signal: {signal}
 
 Confidence: {confidence}%
+
+Setup: {setup_rating}
 
 Entry: {setup["entry"]}
 

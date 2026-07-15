@@ -11,6 +11,7 @@ def analyze_strategy(pair="EURUSD"):
             "pair": pair.upper(),
             "signal": "WAIT",
             "confidence": 0,
+            "setup": "No Setup",
             "reason": "No candle data available"
         }
 
@@ -26,54 +27,75 @@ def analyze_strategy(pair="EURUSD"):
     last_price = prices[-1]
     previous_price = prices[-2]
 
-    # Trend check
+
     if ema_value > sma_value:
-        score += 30
+        score += 35
         reasons.append("EMA bullish trend")
     else:
-        score -= 30
+        score -= 35
         reasons.append("EMA bearish trend")
 
-    # RSI check
-    if rsi_value > 55:
-        score += 30
-        reasons.append("RSI bullish momentum")
 
-    elif rsi_value < 45:
-        score -= 30
-        reasons.append("RSI bearish momentum")
+    if rsi_value > 60:
+        score += 35
+        reasons.append("Strong RSI momentum")
+
+    elif rsi_value >= 50:
+        score += 15
+        reasons.append("RSI positive")
+
+    elif rsi_value < 40:
+        score -= 35
+        reasons.append("Strong RSI weakness")
 
     else:
         reasons.append("RSI neutral")
 
-    # Candle movement
-    if last_price > previous_price:
-        score += 20
-        reasons.append("Price rising")
-    else:
-        score -= 20
-        reasons.append("Price falling")
 
-    # Final decision
-    if score >= 50:
+    if last_price > previous_price:
+        score += 30
+        reasons.append("Price confirmation bullish")
+    else:
+        score -= 30
+        reasons.append("Price confirmation bearish")
+
+
+    if score >= 60:
         signal = "BUY"
 
-    elif score <= -50:
+    elif score <= -60:
         signal = "SELL"
 
     else:
         signal = "WAIT"
 
-    # Confidence
+
+    confidence = min(abs(score), 95)
+
+
+    if confidence >= 90:
+        setup = "🔥 Elite Setup"
+
+    elif confidence >= 75:
+        setup = "🟢 Strong Setup"
+
+    elif confidence >= 60:
+        setup = "🟡 Moderate Setup"
+
+    else:
+        setup = "⚪ Weak Setup"
+
+
     if signal == "WAIT":
         confidence = 50
-    else:
-        confidence = min(abs(score) + 20, 95)
+        setup = "⚪ No Clear Setup"
+
 
     return {
         "pair": pair.upper(),
         "signal": signal,
         "confidence": confidence,
+        "setup": setup,
         "SMA": round(sma_value, 5),
         "EMA": round(ema_value, 5),
         "RSI": round(rsi_value, 2),
