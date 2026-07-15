@@ -1,5 +1,7 @@
 from market_feed import get_price
 from strategy import analyze_strategy
+from candles import get_candles
+from trade_setup import calculate_trade_setup
 
 
 def generate_signal(pair):
@@ -26,7 +28,8 @@ Signal: WAIT
 
 Confidence: {confidence}%
 
-Reason: {result["reason"]}
+Reason:
+{result["reason"]}
 
 SMA: {result["SMA"]}
 EMA: {result["EMA"]}
@@ -35,15 +38,14 @@ RSI: {result["RSI"]}
 ⚠️ No clear setup.
 """
 
-    if signal == "BUY":
-        sl = price - 0.0050
-        tp1 = price + 0.0100
-        tp2 = price + 0.0150
+    candles = get_candles(pair)
 
-    else:
-        sl = price + 0.0050
-        tp1 = price - 0.0100
-        tp2 = price - 0.0150
+    setup = calculate_trade_setup(
+        pair,
+        signal,
+        price,
+        candles
+    )
 
     return f"""
 📡 AlphaPilot Smart Signal
@@ -52,18 +54,20 @@ Pair: {pair}
 
 Signal: {signal}
 
-Entry: {round(price,5)}
-
-Stop Loss: {round(sl,5)}
-
-Take Profit 1: {round(tp1,5)}
-
-Take Profit 2: {round(tp2,5)}
-
 Confidence: {confidence}%
 
-Reason: {result["reason"]}
+Entry: {setup["entry"]}
 
-⚠️ Confirm before trading.
+Stop Loss: {setup["stop_loss"]}
+
+Take Profit: {setup["take_profit"]}
+
+Risk Reward: {setup["risk_reward"]}
+
+Reason:
+{result["reason"]}
+
+SMA: {result["SMA"]}
+EMA: {result["EMA"]}
+RSI: {result["RSI"]}
 """
-

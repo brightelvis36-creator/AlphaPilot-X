@@ -14,7 +14,7 @@ def ema(prices):
     for price in prices[1:]:
         ema_value = (price * alpha) + (ema_value * (1 - alpha))
 
-    return round(ema_value, 2)
+    return round(ema_value, 5)
 
 
 def rsi(prices):
@@ -42,3 +42,27 @@ def rsi(prices):
     value = 100 - (100 / (1 + rs))
 
     return round(value, 2)
+
+
+def atr(candles, period=14):
+
+    if len(candles) < period + 1:
+        return 0
+
+    true_ranges = []
+
+    for i in range(1, len(candles)):
+
+        high = candles[i]["high"]
+        low = candles[i]["low"]
+        previous_close = candles[i-1]["close"]
+
+        tr = max(
+            high - low,
+            abs(high - previous_close),
+            abs(low - previous_close)
+        )
+
+        true_ranges.append(tr)
+
+    return round(sum(true_ranges[-period:]) / period, 5)
