@@ -1,2 +1,4 @@
 __pycache__/
 *.pyc
+alphapilot_memory.json
+trade_history.json
