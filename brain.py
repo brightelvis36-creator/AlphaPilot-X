@@ -1,7 +1,7 @@
 from datetime import datetime
 from memory import remember, recall, forget, get_all_memory
 from trading import trade_setup
-
+from history import add_trade, get_history
 def alphapilot_response(message):
     original = message
     message = message.lower().strip()
@@ -76,5 +76,26 @@ forget favorite pair
     elif message.startswith("trade "):
         pair = original[6:].strip().upper()
         return trade_setup(pair)
+    elif message.startswith("journal "):
+        parts = original.split()
+
+        if len(parts) == 7:
+            _, pair, direction, entry, stop_loss, take_profit, result = parts
+
+            return add_trade(
+                pair.upper(),
+                direction.upper(),
+                entry,
+                stop_loss,
+                take_profit,
+                result.upper()
+            )
+
+        return (
+            "Usage:\n"
+            "journal PAIR BUY/SELL ENTRY STOPLOSS TAKEPROFIT WIN/LOSS\n"
+            "Example:\n"
+            "journal EURUSD BUY 1.1700 1.1660 1.1780 WIN"
+        )
     else:
         return "🤖 I don't understand that command yet. Type 'help' to see available commands."

@@ -1,34 +1,38 @@
-import requests
+import json
+import os
+
+HISTORY_FILE = "trade_history.json"
 
 
-def get_history(pair="BTCUSD", days=30):
+def load_history():
+    if os.path.exists(HISTORY_FILE):
+        with open(HISTORY_FILE, "r") as file:
+            return json.load(file)
+    return []
 
-    coins = {
-        "BTCUSD": "bitcoin",
-        "ETHUSD": "ethereum",
-        "SOLUSD": "solana"
+
+def save_history(history):
+    with open(HISTORY_FILE, "w") as file:
+        json.dump(history, file, indent=4)
+
+
+def add_trade(pair, direction, entry, stop_loss, take_profit, result):
+    history = load_history()
+
+    trade = {
+        "pair": pair,
+        "direction": direction,
+        "entry": entry,
+        "stop_loss": stop_loss,
+        "take_profit": take_profit,
+        "result": result
     }
 
-    pair = pair.upper()
+    history.append(trade)
+    save_history(history)
 
-    if pair not in coins:
-        return []
+    return "✅ Trade saved successfully."
 
-    try:
-        url = (
-            f"https://api.coingecko.com/api/v3/coins/"
-            f"{coins[pair]}/market_chart?vs_currency=usd&days={days}"
-        )
 
-        response = requests.get(url, timeout=10)
-        data = response.json()
-
-        prices = []
-
-        for item in data["prices"]:
-            prices.append(item[1])
-
-        return prices
-
-    except:
-        return []
+def get_history():
+    return load_history()
