@@ -1,17 +1,18 @@
 from datetime import datetime
-
+from market_feed import get_price
 
 def get_market_data(pair):
-    pair = pair.upper()
+    data = get_price(pair)
 
     return f"""
 📡 Live Market Data
 
-Pair: {pair}
+Pair: {data['pair']}
 
-Price: Waiting for feed
+Price: {data['price']}
 
-Time: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
+Time: {data['time']}
 
 Status: Connected
 """
+
