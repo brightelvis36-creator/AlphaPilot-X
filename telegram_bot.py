@@ -1,22 +1,18 @@
-from telegram import Update
-from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
+from telegram.ext import Application, CommandHandler, MessageHandler, filters
 from brain import alphapilot_response
+import os
 
-TOKEN = "8994854153:AAEwFC_bEAk-yZR30vQdGytCrOtff80iAaM"
+TOKEN = os.getenv("BOT_TOKEN")
 
-
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def start(update, context):
     await update.message.reply_text(
-        "🚀 AlphaPilot is online!\n\nYour AI assistant is ready."
+        "🚀 AlphaPilot X is online 🧠"
     )
 
-
-async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_message = update.message.text
-    reply = alphapilot_response(user_message)
-
-    await update.message.reply_text(reply)
-
+async def chat(update, context):
+    user_text = update.message.text
+    response = alphapilot_response(user_text)
+    await update.message.reply_text(response)
 
 def main():
     app = Application.builder().token(TOKEN).build()
@@ -26,9 +22,8 @@ def main():
         MessageHandler(filters.TEXT & ~filters.COMMAND, chat)
     )
 
-    print("🚀 AlphaPilot Telegram Bot Running...")
+    print("🤖 AlphaPilot Telegram Bot Running...")
     app.run_polling()
-
 
 if __name__ == "__main__":
     main()
