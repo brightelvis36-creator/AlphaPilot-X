@@ -1,5 +1,5 @@
+from multi_timeframe import analyze_multi_timeframe
 from signal_engine import generate_signal
-from strategy import analyze_strategy
 from market_feed import get_price
 from candles import get_candles
 from trade_setup import calculate_trade_setup
@@ -8,10 +8,14 @@ from risk_manager import calculate_risk, calculate_lot_size, calculate_pips
 
 def generate_trade_plan(
     pair,
-    timeframe="1h",
+    timeframe="15m",
     balance=1000,
     risk_percent=2
 ):
+
+    elite = analyze_multi_timeframe(pair)
+
+    strategy = elite["entry_15m"]
 
     market = get_price(pair)
 
@@ -20,10 +24,33 @@ def generate_trade_plan(
 
     price = float(market["price"])
 
-    strategy = analyze_strategy(pair, timeframe)
+    if elite["decision"] == "WAIT":
+        return f"""
+📡 AlphaPilot Elite Trade Plan
 
-    if strategy["signal"] == "WAIT":
-        return generate_signal(pair)
+Pair: {pair}
+
+4H Trend:
+{elite["trend_4h"]["signal"]}
+
+1H Confirmation:
+{elite["confirmation_1h"]["signal"]}
+
+15M Entry:
+{elite["entry_15m"]["signal"]}
+
+Decision:
+WAIT ⏳
+
+Confidence:
+{elite["confidence"]}%
+
+Setup:
+{elite["setup"]}
+
+Reason:
+Waiting for stronger confirmation.
+"""
 
     candles = get_candles(pair, timeframe)
 
@@ -50,33 +77,51 @@ def generate_trade_plan(
     )
 
     return f"""
-📡 AlphaPilot Trade Plan
+📡 AlphaPilot Elite Trade Plan
 
 Pair: {pair}
 
-Timeframe: {timeframe}
+4H Trend:
+{elite["trend_4h"]["signal"]}
 
-Signal: {strategy["signal"]}
+1H Confirmation:
+{elite["confirmation_1h"]["signal"]}
 
-Confidence: {strategy["confidence"]}%
+15M Entry:
+{elite["entry_15m"]["signal"]}
 
-Setup: {strategy["setup"]}
+🔥 Decision:
+{elite["decision"]}
 
-Entry: {setup["entry"]}
+Confidence:
+{elite["confidence"]}%
 
-Stop Loss: {setup["stop_loss"]}
+Setup:
+{elite["setup"]}
 
-Take Profit: {setup["take_profit"]}
+Entry:
+{setup["entry"]}
 
-Balance: ${balance}
+Stop Loss:
+{setup["stop_loss"]}
 
-Risk: {risk_percent}%
+Take Profit:
+{setup["take_profit"]}
 
-Maximum Loss: ${risk_amount}
+Balance:
+${balance}
 
-Suggested Lot Size: {lot_size}
+Risk:
+{risk_percent}%
 
-Risk Reward: {setup["risk_reward"]}
+Maximum Loss:
+${risk_amount}
+
+Suggested Lot Size:
+{lot_size}
+
+Risk Reward:
+{setup["risk_reward"]}
 
 Reason:
 • {strategy["reason"].replace(", ", "\n• ")}
