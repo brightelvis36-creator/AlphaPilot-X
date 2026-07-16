@@ -5,6 +5,7 @@ from analyzer import analyze_market
 from market_feed import get_price
 from signal_engine import generate_signal
 from trade_plan import generate_trade_plan
+from decision_engine import make_final_decision
 
 
 def alphapilot_response(message):
@@ -12,7 +13,7 @@ def alphapilot_response(message):
     message = message.strip()
 
     if message.lower() in ["hello", "hi", "hey"]:
-        return "👋 Hello Boss! AlphaPilot Brain v15.1 is online. 🧠"
+        return "👋 Hello Boss! AlphaPilot Brain is online. 🧠"
 
     elif message.lower() == "status":
         return "🟢 AlphaPilot systems online."
@@ -21,8 +22,7 @@ def alphapilot_response(message):
         return datetime.now().strftime("🕒 %Y-%m-%d %H:%M:%S")
 
     elif message.lower() == "memory":
-        memories = get_all_memory()
-        return f"🧠 Memory:\n{memories}"
+        return f"🧠 Memory:\n{get_all_memory()}"
 
     elif message.lower().startswith("learn "):
         info = message[6:]
@@ -30,34 +30,12 @@ def alphapilot_response(message):
         return f"✅ Learned: {info}"
 
     elif message.lower().startswith("signal "):
-
         parts = message.split()
-
-        if len(parts) < 2:
-            return "Usage: signal EURUSD"
-
         pair = parts[1].upper()
-
         return generate_signal(pair)
 
     elif message.lower().startswith("plan "):
-
         parts = message.split()
-
-        if len(parts) < 2:
-            return """
-Usage:
-
-plan EURUSD
-
-or
-
-plan EURUSD 500
-
-or
-
-plan EURUSD 500 1
-"""
 
         pair = parts[1].upper()
 
@@ -65,16 +43,10 @@ plan EURUSD 500 1
         risk = 2
 
         if len(parts) >= 3:
-            try:
-                balance = float(parts[2])
-            except ValueError:
-                return "❌ Invalid account balance."
+            balance = float(parts[2])
 
         if len(parts) >= 4:
-            try:
-                risk = float(parts[3])
-            except ValueError:
-                return "❌ Invalid risk percentage."
+            risk = float(parts[3])
 
         return generate_trade_plan(
             pair,
@@ -83,11 +55,7 @@ plan EURUSD 500 1
         )
 
     elif message.lower().startswith("analyze "):
-
         parts = message.split()
-
-        if len(parts) < 2:
-            return "Usage: analyze EURUSD"
 
         pair = parts[1].upper()
 
@@ -111,29 +79,51 @@ Signal: {result['signal']}
 Confidence: {result['confidence']}
 """
 
-    elif message.lower() == "help":
+    elif message.lower().startswith("decision "):
+        parts = message.split()
 
+        pair = parts[1].upper()
+
+        result = make_final_decision(pair)
+
+        return f"""
+🔥 AlphaPilot AI Decision
+
+Pair: {result['pair']}
+
+Decision:
+{result['decision']}
+
+Confidence:
+{result['confidence']}%
+
+Score:
+{result['score']}
+
+Reason:
+{result['reason']}
+"""
+
+    elif message.lower() == "help":
         return """
-🚀 AlphaPilot X Commands
+🚀 AlphaPilot Commands
 
 hello
 status
 time
 memory
-learn [information]
+learn [text]
 
 signal EURUSD
 
 plan EURUSD
 
-plan EURUSD 500
-
-plan EURUSD 500 1
-
 analyze EURUSD
+
+decision EURUSD
 
 help
 """
 
     else:
-        return "🤖 I don't understand that command. Type 'help'."
+        return "🤖 I don't understand that command. Type help."
