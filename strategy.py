@@ -2,13 +2,14 @@ from candles import get_candles
 from indicators import sma, ema, rsi
 
 
-def analyze_strategy(pair="EURUSD"):
+def analyze_strategy(pair="EURUSD", timeframe="1h"):
 
-    candles = get_candles(pair)
+    candles = get_candles(pair, timeframe)
 
     if not candles:
         return {
             "pair": pair.upper(),
+            "timeframe": timeframe,
             "signal": "WAIT",
             "confidence": 0,
             "setup": "No Setup",
@@ -27,7 +28,7 @@ def analyze_strategy(pair="EURUSD"):
     last_price = prices[-1]
     previous_price = prices[-2]
 
-
+    # EMA Trend
     if ema_value > sma_value:
         score += 35
         reasons.append("EMA bullish trend")
@@ -35,7 +36,7 @@ def analyze_strategy(pair="EURUSD"):
         score -= 35
         reasons.append("EMA bearish trend")
 
-
+    # RSI
     if rsi_value > 60:
         score += 35
         reasons.append("Strong RSI momentum")
@@ -51,7 +52,7 @@ def analyze_strategy(pair="EURUSD"):
     else:
         reasons.append("RSI neutral")
 
-
+    # Price confirmation
     if last_price > previous_price:
         score += 30
         reasons.append("Price confirmation bullish")
@@ -59,7 +60,7 @@ def analyze_strategy(pair="EURUSD"):
         score -= 30
         reasons.append("Price confirmation bearish")
 
-
+    # Final signal
     if score >= 60:
         signal = "BUY"
 
@@ -69,9 +70,7 @@ def analyze_strategy(pair="EURUSD"):
     else:
         signal = "WAIT"
 
-
     confidence = min(abs(score), 95)
-
 
     if confidence >= 90:
         setup = "🔥 Elite Setup"
@@ -85,14 +84,13 @@ def analyze_strategy(pair="EURUSD"):
     else:
         setup = "⚪ Weak Setup"
 
-
     if signal == "WAIT":
         confidence = 50
         setup = "⚪ No Clear Setup"
 
-
     return {
         "pair": pair.upper(),
+        "timeframe": timeframe,
         "signal": signal,
         "confidence": confidence,
         "setup": setup,
