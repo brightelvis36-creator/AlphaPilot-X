@@ -60,5 +60,6 @@ def make_final_decision(pair="EURUSD"):
         "score": score,
         "multi_timeframe": mtf,
         "smart_money": smart_money,
-        "reason": ", ".join(reasons)
+        "reason": ", ".join(reasons),
+"summary": reasons
     }
